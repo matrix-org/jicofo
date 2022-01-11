@@ -1299,7 +1299,8 @@ public class JitsiMeetConferenceImpl
             // conference will not be aware of the participant.
             long ssrc = RANDOM.nextInt() & 0xffff_ffffL;
             logger.info(participant + " did not advertise any SSRCs. Injecting " + ssrc);
-            sourcesAdvertised = new EndpointSourceSet(new Source(ssrc, MediaType.AUDIO, null, null, true));
+            sourcesAdvertised = new EndpointSourceSet(
+                    new Source(ssrc, MediaType.AUDIO, participantId + "-a0", null, true));
         }
         ConferenceSourceMap sourcesAccepted;
         try
