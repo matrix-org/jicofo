@@ -1,0 +1,30 @@
+name: Build deb package
+
+on:
+  push:
+    branches: [ 6826-autostream ]
+
+env:
+  # Java version to use for the release
+  RELEASE_JAVA_VERSION: 8
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Set up JDK
+        uses: actions/setup-java@v2
+        with:
+          distribution: temurin
+          java-version: ${{ RELEASE_JAVA_VERSION }}
+          cache: maven
+
+      - name: Build and test with Maven
+        run: mvn verify -B -Pcoverage
+
+      - name: Build Deb
+        run: resources/build_deb_package.sh
