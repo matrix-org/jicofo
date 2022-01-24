@@ -20,7 +20,7 @@ jobs:
         uses: actions/setup-java@v2
         with:
           distribution: temurin
-          java-version: ${{ RELEASE_JAVA_VERSION }}
+          java-version: $RELEASE_JAVA_VERSION
           cache: maven
 
       - name: Build and test with Maven
