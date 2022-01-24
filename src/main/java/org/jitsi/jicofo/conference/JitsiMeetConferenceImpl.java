@@ -320,7 +320,8 @@ public class JitsiMeetConferenceImpl
                             jibriDetector,
                             logger);
 
-                if (!this.roomName.getLocalpartOrThrow().asUnescapedString().startsWith("__jicofo-health-check")) {
+                if (!this.roomName.getLocalpartOrThrow().asUnescapedString().startsWith("__jicofo-health-check"))
+                {
                     jibriRecorder.startAutoStream();
                 }
             }
