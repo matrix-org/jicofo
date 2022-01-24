@@ -319,6 +319,10 @@ public class JitsiMeetConferenceImpl
                             this,
                             jibriDetector,
                             logger);
+
+                if (!this.roomName.getLocalpartOrThrow().asUnescapedString().startsWith("__jicofo-health-check")) {
+                    jibriRecorder.startAutoStream();
+                }
             }
 
             JibriDetector sipJibriDetector = jicofoServices.getSipJibriDetector();

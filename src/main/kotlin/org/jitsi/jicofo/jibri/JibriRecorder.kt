@@ -28,9 +28,16 @@ import org.jitsi.xmpp.extensions.jibri.JibriIq
 import org.jitsi.xmpp.extensions.jibri.JibriIq.RecordingMode
 import org.jitsi.xmpp.extensions.jibri.JibriIq.Status
 import org.jitsi.xmpp.extensions.jibri.RecordingStatus
+import org.jivesoftware.smack.packet.ErrorIQ
 import org.jivesoftware.smack.packet.IQ
 import org.jivesoftware.smack.packet.StanzaError
+import kotlin.Boolean
+import kotlin.String
+import kotlin.Unit
+import kotlin.apply
+import kotlin.let
 import org.jitsi.jicofo.util.ErrorResponse.create as error
+
 
 /**
  * Handles conference recording through Jibri.
@@ -55,6 +62,53 @@ class JibriRecorder(
      * The current recording session or <tt>null</tt>.
      */
     private var jibriSession: JibriSession? = null
+
+    private var autoStream = false;
+    private var autoStreamTries = 0
+
+    fun startAutoStream() {
+        autoStreamTries += 1
+        val autoStreamUrlPrefix = System.getenv("JICOFO_AUTOSTREAM_URL_PREFIX") ?: return
+        autoStream = true
+        val displayName = "autostream"
+        val streamID = autoStreamUrlPrefix + conference.roomName.localpartOrThrow.asUnescapedString()
+        val youTubeBroadcastId: String? = null
+        val sessionId = generateSessionId()
+        val applicationData: String? = null
+        jibriSession = JibriSession(
+                this,
+                conference.roomName,
+                conference.roomName,
+                config.pendingTimeout.seconds,
+                config.numRetries,
+                jibriDetector,
+                false, null, displayName, streamID, youTubeBroadcastId, sessionId, applicationData,
+                logger)
+        try {
+            jibriSession!!.start()
+            logger.info("Started Jibri auto-streaming session")
+        } catch (exc: StartException) {
+            var errorIq: ErrorIQ
+            val reason = exc.message
+            if (exc is AllBusy) {
+                logger.info(
+                        "Failed to start a Jibri session, " +
+                        "all Jibris were busy"
+                )
+            } else if (exc is NotAvailable) {
+                logger.info(
+                        "Failed to start a Jibri session, " +
+                        "no Jibris available"
+                )
+            } else {
+                logger.info(
+                        "Failed to start a Jibri session: $reason"
+                )
+            }
+            jibriSession = null
+        }
+    }
+
 
     fun shutdown() {
         jibriSession?.stop(null)
@@ -148,6 +202,14 @@ class JibriRecorder(
         publishJibriRecordingStatus(newStatus, failureReason)
         if (newStatus == Status.OFF) {
             this.jibriSession = null
+            if (autoStream) {
+                if (autoStreamTries <= 5) {
+                    logger.info("Retrying jibri stream");
+                    startAutoStream();
+                } else {
+                    logger.info("Giving up: no longer retrying jibri stream");
+                }
+            }
         }
     }
 
