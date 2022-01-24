@@ -14,23 +14,16 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Install packages
+        run: |
+          sudo apt-get update
+          sudo apt-get install devscripts debhelper maven
+
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Set up JDK
-        uses: actions/setup-java@v2
-        with:
-          distribution: temurin
-          java-version: ${{ env.RELEASE_JAVA_VERSION }}
-          cache: maven
-
       - name: Build and test with Maven
         run: mvn verify -B -Pcoverage
-
-      - name: Install devscripts
-        run: |
-          sudo apt-get update
-          sudo apt-get install devscripts
 
       - name: Build Deb
         run: resources/build_deb_package.sh
