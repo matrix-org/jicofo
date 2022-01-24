@@ -28,8 +28,13 @@ jobs:
       - name: Build Deb
         run: resources/build_deb_package.sh
 
+      # The script puts the deb in the parent dir, but
+      # the upload action doesn't allow that
+      - name: Move Deb
+        run: mv ../*.deb ./
+
       - name: Upload Artifact
         uses: actions/upload-artifact@v2
         with:
           name: debpkg
-          path: '../*.deb'
+          path: '*.deb'
