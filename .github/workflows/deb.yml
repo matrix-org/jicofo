@@ -2,12 +2,12 @@ name: Build deb package
 
 on:
   push:
-    branches: [ 6826-autostream ]
+    branches: [ fosdem ]
 
 env:
   # Java version to use for the release
   RELEASE_JAVA_VERSION: 8
-  BUILD_NUMBER: 6826-autostream
+  BUILD_NUMBER: 8218-autostream
 
 jobs:
   build:
